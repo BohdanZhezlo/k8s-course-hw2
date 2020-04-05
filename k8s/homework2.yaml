@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-app
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: python-app
+    spec:
+      containers:
+        - name: python-app
+          image: gcr.io/bzhezlo-lohika-k8s-course/python-app:homework-2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 5
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+        - name: http-echo
+          image: hashicorp/http-echo
+          imagePullPolicy: Always
+          args:
+            - "-text=bzhezlo-hw2"
+          ports:
+            - containerPort: 5678
+  selector:
+    matchLabels:
+      app: python-app
